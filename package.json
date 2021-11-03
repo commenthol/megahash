@@ -17,7 +17,7 @@
 		"hashtable",
 		"DJB2"
 	],
-	"main": "main.js",
+	"main": "index.js",
 	"gypfile": true,
 	"dependencies": {
 		"bindings": "^1.5.0",
@@ -27,6 +27,6 @@
 		"pixl-unit": "^1.0.0"
 	},
 	"scripts": {
-		"test": "pixl-unit test/test.js"
+		"test": "pixl-unit test/test.js test/MegaMap.test.js"
 	}
 }

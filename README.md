@@ -27,6 +27,18 @@
 	* [nextKey](#nextkey)
 	* [length](#length)
 	* [stats](#stats)
+- [API MegaMap](#api-megamap)
+	* [size](#size)
+	* [set](#set-1)
+	* [get](#get-1)
+	* [has](#has-1)
+	* [delete](#delete-1)
+	* [clear](#clear-1)
+	* [keys](#keys)
+	* [values](#values)
+	* [entries](#entries)
+	* [forEach](#foreach)
+	* [@@iterator](#iterator)
 - [Internals](#internals)
 	* [Limits](#limits)
 	* [Memory Overhead](#memory-overhead)
@@ -112,6 +124,27 @@ hash.set( "hello", "there" );
 console.log( hash.get("hello") );
 hash.delete("hello");
 hash.clear();
+```
+
+Or use as an ES6 compatible [Map][Map]:
+
+```js
+const { MegaMap } = require('megahash');
+const map = new MegaMap();
+
+map.set('hello', 'Hello').set('world', 'World');
+
+// iterate over key value pairs
+for (const [key, value] of map) {
+	console.log([key, value]);
+}
+// using an iterator for keys
+const iterator = map.keys();
+while (true) {
+	const { done, value } = iterator.next();
+	if (done) break;
+	console.log(value);
+}
 ```
 
 ## Setting and Getting
@@ -417,6 +450,155 @@ var stats = hash.stats();
 
 See [Hash Stats](#hash-stats) for more details about these properties.
 
+# API MegaMap
+
+> **NOTE**: MegaMap only allows keys of type string. ES6 Map in contrast also allows objects, functions, symbols.<br>
+> E.g. `map.set('1', 'a').set(1, 'b')` will only set one entry with `'1'`. Here `map.get('1')  === map.get(1) === 'b'`.
+
+Common methods and properties of an [ES6 Map][Map] are supported.
+
+```js
+const {MegaMap} = require('megahash');
+const map = new MegaMap();
+```
+
+## size
+
+returns the number of elements in a MegaMap object
+
+```js
+map.set('1', 10).set('b', 'c');
+map.size
+//> 2
+```
+
+## set
+
+adds or updates an element with a specified key and a value
+
+```js
+map.set('1', 10).set('b', 'c');
+//> MegaMap(2) { '1' => 10, 'b' => 'c' }
+```
+
+## get
+
+returns value of a element specified by its key
+
+```js
+map.set('1', 10).get('1');
+//> `10`
+```
+
+## has
+
+returns a boolean indicating whether an element with the specified key exists or not
+
+```js
+map.set('1', 10);
+map.has('1')
+//> true
+map.has('not there')
+//> false
+```
+
+## delete
+
+removes the specified element by key
+
+```js
+map.set('1', 10);
+map.delete('1');
+//> true
+map.delete('not there');
+//> false
+```
+
+## clear
+
+removes all elements
+
+```js
+map.clear();
+```
+
+## keys
+
+returns a new Iterator object that contains the keys for each element.
+
+```js
+const iterator = map.keys();
+while (true) {
+	const { done, value: key } = iterator.next();
+	if (done) break;
+	// do sth. with `key`
+}
+```
+
+```js
+// convert iterator to array
+const array = [...map.keys()]
+```
+
+## values
+
+returns a new Iterator object that contains the values for each element.
+
+```js
+const iterator = map.values();
+while (true) {
+	const { done, value } = iterator.next();
+	if (done) break;
+	// do sth. with `value`
+}
+```
+
+```js
+// convert iterator to array
+const array = [...map.values()]
+```
+
+## entries
+
+returns a new Iterator object that contains the entries for each element.
+
+```js
+const iterator = map.entries();
+while (true) {
+	const { done, value: _value } = iterator.next();
+	if (done) break;
+	const [key, value] = _value || [];
+	// do sth. with `key` and `value`
+}
+```
+
+```js
+// convert iterator to obj
+const obj = Object.fromEntries(map.entries())
+// or shorter
+const obj = Object.fromEntries(map)
+```
+
+## forEach
+
+executes a provided function once per each key/value pair
+
+```js
+map.forEach((value, key, map) => {
+	// do sth. with `key` and `value`
+});
+```
+
+## @@iterator
+
+iterate over all entries in the map
+
+```js
+for (const [key, value] of map) {
+	// do sth. with `key` and `value`
+}
+```
+
 # Internals
 
 MegaHash uses [separate chaining](https://en.wikipedia.org/wiki/Hash_table#Separate_chaining) to store data, which is a combination of an index and a linked list.  However, our indexing system is unique in that the indexes themselves become links on the chain, when the linked lists reach a certain size.  Effectively, the indexes are *nested*, using different bits of the key digest, and the index tree grows as more keys are added.
@@ -488,3 +670,5 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+[Map]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
